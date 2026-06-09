@@ -1,0 +1,56 @@
+export type { Usuario, UsuarioInventario } from './usuario';
+
+export type { Paciente, PacienteBasico, HistoriaClinicaVersion } from './paciente';
+
+export type { Cita, HoraLibre, ElementoAgenda } from './cita';
+
+export type {
+  Inventario,
+  Producto,
+  Material,
+  Activo,
+  ReporteValor,
+  MovimientoKardex,
+  EventoBitacora,
+  RegistroAuditoria
+} from './inventario';
+
+export {
+  TipoProducto,
+  SubtipoMaterial,
+  SubtipoActivoFijo,
+  EstadoActivo,
+  TipoMovimientoKardex
+} from './inventario';
+
+export type {
+  MaterialCita,
+  MaterialCitaConfirmacion,
+  MaterialGeneral
+} from './material';
+
+export type { Tratamiento, PlanTratamiento } from './tratamiento';
+
+export type { Movimiento, ReporteFinanzas, DatosGrafico, FiltrosAnalisis, RespuestaAnalisis } from './finanzas';
+
+export type { ItemCatalogo } from './catalogo';
+
+export type { ArchivoAdjunto, EdicionVersion } from './archivo';
+
+export type { Reporte, ReporteGenerado } from './reporte';
+export { AreaReporte } from './reporte';
+
+export type { PlantillaConsentimiento, EtiquetaReemplazable } from './plantilla-consentimiento';
+export type { PlantillaReceta, MedicamentoRecetaValor } from './plantilla-receta';
+
+export type {
+  SimboloOdontograma,
+  PiezaAfectada,
+  TransformacionSimbolo,
+  OdontogramaAplicacion,
+  Odontograma,
+  CrearSimboloOdontogramaDto,
+  AplicarSimboloDto
+} from './odontograma';
+
+export type { TutorialCompletado } from './tutorial';

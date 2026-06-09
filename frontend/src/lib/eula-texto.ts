@@ -1,0 +1,46 @@
+export const EULA_VERSION = 'v1';
+
+export const EULA_TEXTO = `
+<div class="space-y-4 text-sm leading-relaxed text-justify">
+    <h2 class="text-xl font-bold text-foreground">Acuerdo de Licencia de Usuario Final (EULA) para 0d3ntApp</h2>
+    
+    <p><strong class="font-semibold">IMPORTANTE - LÉASE ATENTAMENTE:</strong> Este Acuerdo de Licencia de Usuario Final ("EULA") es un acuerdo legal vinculante entre usted (ya sea una persona física o jurídica, en adelante "el Cliente" o "el Usuario") y el desarrollador de <strong class="font-semibold">0d3ntApp</strong> (en adelante "el Desarrollador"). Al instalar, copiar, ejecutar o utilizar de cualquier otra manera este software, usted acepta expresa e incondicionalmente estar sujeto a los términos y condiciones de este EULA. Si no está de acuerdo con estos términos, no instale ni utilice el software.</p>
+
+    <h3 class="text-lg font-semibold text-foreground mt-6">1. Concesión de la Licencia y Duración</h3>
+    <p>El Desarrollador concede al Cliente una licencia limitada, personal, no exclusiva, intransferible y no sublicenciable para utilizar <strong class="font-semibold">0d3ntApp</strong> como aplicación de escritorio para la gestión de su clínica médica o dental. Esta licencia se otorga con un carácter de <strong class="font-semibold">duración ilimitada (de por vida)</strong> para la versión adquirida.</p>
+    <p class="mt-2">El Cliente adquiere el derecho de uso sobre una copia legítima del software, la cual está irrevocablemente <strong class="font-semibold">vinculada al hardware de un único dispositivo físico</strong> mediante la generación de un identificador de hardware único (HWID). Sin embargo, dentro de este dispositivo único autorizado, la plataforma permite la creación y gestión de <strong class="font-semibold">múltiples usuarios</strong> (sesiones locales). Todo uso de la licencia y software queda sujeto al estricto y continuo cumplimiento de todos los términos de este acuerdo.</p>
+
+    <h3 class="text-lg font-semibold text-foreground mt-6">2. Propiedad Intelectual, Restricciones y Revocación</h3>
+    <p>El software se licencia, no se vende. El Desarrollador es el único autor y creador de 0d3ntApp, y retiene absoluta e indiscutiblemente todos los derechos de autor, títulos, patentes, marcas comerciales y cualquier otro interés de propiedad intelectual sobre el código fuente, la arquitectura, los diseños y cualquier componente asociado a 0d3ntApp.</p>
+    <p class="mt-2">El Cliente tiene estrictamente prohibido, de manera directa o indirecta:</p>
+    <ul class="list-disc pl-5 space-y-1 mt-2">
+        <li><strong class="font-semibold">(a)</strong> Descompilar, realizar ingeniería inversa, desensamblar o intentar extraer el código fuente del software.</li>
+        <li><strong class="font-semibold">(b)</strong> Modificar, adaptar, traducir o crear obras derivadas basadas en 0d3ntApp.</li>
+        <li><strong class="font-semibold">(c)</strong> Eludir, alterar, clonar o remover cualquier restricción de licencia, identificador de hardware (HWID), medida de seguridad tecnológica o sistema de licenciamiento habilitado.</li>
+        <li><strong class="font-semibold">(d)</strong> Comercializar, alquilar, arrendar o instalar y distribuir el software a terceros o en múltiples dispositivos sin adquirir licencias adicionales.</li>
+    </ul>
+    <p class="mt-2 text-destructive font-semibold">Cualquier demostración o evidencia de manipulación no autorizada, intento de piratería (cracking), violación de propiedad intelectual, uso fraudulento de la licencia o incumplimiento de cualquiera de estas restricciones otorgará al Desarrollador el derecho unilateral e inapelable de suspender, bloquear y revocar definitivamente la licencia del Cliente sin derecho a compensación o reembolso alguno.</p>
+
+    <h3 class="text-lg font-semibold text-foreground mt-6">3. Privacidad de Datos y Responsabilidad del Cliente</h3>
+    <p>0d3ntApp opera procesando información clínica e historial médico de pacientes. <strong class="font-semibold">El Cliente es el único y exclusivo responsable de la custodia, seguridad y privacidad de los datos ingresados en el sistema</strong>, así como del estricto cumplimiento normativo de las leyes de Protección de Datos Personales, protección del secreto profesional y manejo de registros médicos aplicables en su país o jurisdicción (ej. normativas y leyes locales de salud de la región de Latinoamérica).</p>
+    <p>0d3ntApp se proporciona como una herramienta tecnológica; el Desarrollador no funciona como encargado general del tratamiento de los datos ni tiene acceso de oficio a los mismos de forma centralizada. La responsabilidad legal y administrativa absoluta sobre el manejo ético y seguro de dicha información recae enteramente en el Cliente (quien actúa como el titular/responsable único).</p>
+
+    <h3 class="text-lg font-semibold text-foreground mt-6">4. Limitación de Responsabilidad Legal y Uso Ético</h3>
+    <p><strong class="font-semibold">0d3ntApp</strong> es exclusivamente una herramienta de apoyo diseñada para colaborar en la administración clínica y de agendamiento.</p>
+    <p>En la máxima medida permitida por la ley aplicable, el Desarrollador no asume ninguna responsabilidad legal, civil, penal o administrativa ante el Cliente ni ante terceros por daños directos, indirectos, incidentales o consecuentes que surjan del uso o la imposibilidad de uso del software. Esto incluye, en forma enunciativa mas no limitativa: la toma de decisiones clínicas, negligencias o malas prácticas médicas, pérdida de datos o lucro cesante.</p>
+    <p>Si el Cliente utiliza el software para registrar, gestionar o facilitar actividades ilegales, fraudulentas o cualquier acto contrario a las leyes, el Desarrollador queda total y absolutamente eximido de cualquier implicación, reclamo o sanción, reservándose el derecho de revocar de manera inmediata y definitiva la licencia si así fuese notificado por las autoridades competentes.</p>
+
+    <h3 class="text-lg font-semibold text-foreground mt-6">5. Soporte Técnico, Garantía de Funcionamiento y Políticas de Reembolso</h3>
+    <p>El Desarrollador garantiza que el software <strong class="font-semibold">0d3ntApp</strong> ha sido sometido a rigurosas y múltiples fases de prueba y aseguramiento de control de calidad antes de su despliegue en el mercado, cumpliendo con estándares comerciales razonables de excelencia técnica y estabilidad.</p>
+    <p class="mt-2">Dada la naturaleza del software como un producto digital de licenciamiento vitalicio vinculado al hardware y que su instalación se hace de forma completa y local, <strong class="font-semibold">el Desarrollador establece una estricta política de "No Reembolso" bajo ninguna circunstancia, ni total ni parcial.</strong></p>
+    <p class="mt-2">A pesar de la política restrictiva de reembolso, el Desarrollador aboga por ofrecer <strong class="font-semibold">soluciones proactivas</strong>. En la circunstancia excepcional de que <strong class="font-semibold">0d3ntApp</strong> presente problemas importantes de rendimiento comprobables, fallos de ejecución, o errores funcionales atribuibles estrictamente a defectos del código original (bugs), el cliente goza de la garantía en la que el Desarrollador se compromete a la pronta evaluación e implementación de una solución mediante correcciones de software (parches y actualizaciones).</p>
+    <p class="mt-2">Para hacer efectiva esta garantía de corrección tecnológica y solicitar el respectivo soporte, el Cliente debe documentar y reportar la anomalía técnica formalmente mediante los canales oficiales integrados (ej. usando la sección de reportes directa) o en comunicación profesional con el Desarrollador. Se subraya que el soporte técnico que se provee en vías de reparación abarcará exclusivamente la lógica y estructura sistémica nativa de <em>0d3ntApp</em>; no se incluye de modo alguno asesoría para resolver incompatibilidades por daño en componentes físicos (hardware de terceros), fallas propias del sistema operativo del Cliente, ataques informáticos sobre sus propios equipos o negligencia en el mantenimiento de su ecosistema informático.</p>
+
+    <h3 class="text-lg font-semibold text-foreground mt-6">6. Jurisdicción y Disposiciones Generales</h3>
+    <p>Este acuerdo está amparado y protegido por los tratados internacionales de propiedad intelectual y por las leyes de derecho de autor vigentes aplicables en toda la región de Latinoamérica y jurisdicciones concordantes. En caso de cualquier disputa, divergencia o reclamo derivado del presente EULA o del uso del software, las partes involucradas intentarán llegar a un acuerdo amistoso. De fracasar esta vía, toda controversia estará sujeta exclusivamente a las leyes y tribunales competentes de la jurisdicción de residencia del Desarrollador, a menos que la ley obligue irrenunciablemente a un domicilio legal diferente.</p>
+
+    <p class="mt-6 italic border-t border-border pt-4 text-muted-foreground text-center">
+        Al proceder con la instalación, inicio de sesión o uso del software 0d3ntApp, usted reconoce solemnemente haber leído, comprendido cabalmente y aceptado en su totalidad y sin condición ni reserva todo lo manifestado en este documento.
+    </p>
+</div>
+`;

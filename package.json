@@ -1,0 +1,63 @@
+{
+  "name": "0d3nt",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "gen:ed25519": "node scripts/generar-llaves-ed25519.js",
+    "prepare:pgsql": "node scripts/preparar-pgsql-portable.js",
+    "build:backend": "npm --prefix backend install && npm --prefix backend run build && npm --prefix backend prune --omit=dev",
+    "build:frontend": "npm --prefix frontend run build",
+    "build": "npm run build:frontend && npm run build:backend",
+    "dist": "npm run build && electron-builder --win nsis"
+  },
+  "keywords": [],
+  "author": "Deus Ex Umbra",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.7"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0",
+    "electron": "^40.4.1",
+    "electron-builder": "^26.7.0",
+    "wait-on": "^9.0.4"
+  },
+  "build": {
+    "appId": "com.deusexumbra.0d3nt",
+    "productName": "0d3nt",
+    "asar": true,
+    "directories": {
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "src-main/**",
+      "backend/dist/**",
+      "backend/node_modules/**",
+      "backend/.env",
+      "frontend/dist/**",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "build/pgsql",
+        "to": "pgsql"
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "executableName": "0d3nt",
+      "icon": "build/app_0d3nt_ico_logo.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": false,
+      "include": "build/installer.nsh",
+      "installerIcon": "build/app_0d3nt_ico_logo_gear.ico"
+    }
+  }
+}

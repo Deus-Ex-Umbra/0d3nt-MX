@@ -1,0 +1,84 @@
+.tutorial-popover.driver-popover {
+  background: hsl(var(--card)) !important;
+  color: hsl(var(--foreground)) !important;
+  border: 2px solid hsl(var(--border)) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35) !important;
+  max-width: 420px !important;
+}
+
+.tutorial-popover .driver-popover-title,
+.tutorial-popover .driver-popover-description,
+.tutorial-popover .driver-popover-progress-text {
+  text-shadow: none !important;
+  -webkit-text-stroke: 0 !important;
+  filter: none !important;
+}
+
+.tutorial-popover .driver-popover-title {
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.tutorial-popover .driver-popover-description,
+.tutorial-popover .driver-popover-progress-text {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.tutorial-popover .driver-popover-navigation-btns {
+  gap: 8px !important;
+}
+
+.tutorial-popover .driver-popover-prev-btn,
+.tutorial-popover .driver-popover-next-btn {
+  background: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+  border: none !important;
+  border-radius: 6px !important;
+  padding: 8px 16px !important;
+  font-weight: 600 !important;
+  text-shadow: none !important;
+  -webkit-text-stroke: 0 !important;
+  filter: none !important;
+  transition: opacity 0.2s, transform 0.2s !important;
+}
+
+.tutorial-popover .driver-popover-prev-btn:hover,
+.tutorial-popover .driver-popover-next-btn:hover {
+  opacity: 0.9 !important;
+  transform: scale(1.02) !important;
+}
+
+.tutorial-popover .driver-popover-close-btn {
+  color: hsl(var(--muted-foreground)) !important;
+  text-shadow: none !important;
+  -webkit-text-stroke: 0 !important;
+  filter: none !important;
+}
+
+.tutorial-popover .driver-popover-close-btn:hover {
+  color: hsl(var(--foreground)) !important;
+}
+
+.tutorial-popover .driver-popover-arrow-side-left,
+.tutorial-popover .driver-popover-arrow-side-right,
+.tutorial-popover .driver-popover-arrow-side-top,
+.tutorial-popover .driver-popover-arrow-side-bottom {
+  border-color: hsl(var(--card)) !important;
+}
+
+.tutorial-popover .tutorial-omitir-btn {
+  background: transparent;
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--border));
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-weight: 600;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.tutorial-popover .tutorial-omitir-btn:hover {
+  opacity: 0.9;
+  transform: scale(1.02);
+}

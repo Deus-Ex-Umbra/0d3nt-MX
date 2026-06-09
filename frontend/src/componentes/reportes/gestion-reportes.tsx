@@ -1,0 +1,567 @@
+import { useState, useEffect } from 'react';
+import { Button } from '@/componentes/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/componentes/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/componentes/ui/dialog';
+import { Label } from '@/componentes/ui/label';
+import { Input } from '@/componentes/ui/input';
+import { MultiSelect } from '@/componentes/ui/mulit-select';
+import { Calendar } from '@/componentes/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/componentes/ui/popover';
+import { Switch } from '@/componentes/ui/switch';
+import { reportesApi } from '@/lib/api';
+import { AreaReporte } from '@/tipos';
+import { FileText, Calendar as CalendarIcon, Download, Loader2, Trash2, Eye } from 'lucide-react';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { cn } from '@/lib/utilidades';
+import { useToast } from '@/hooks/use-toast';
+import { useClinica } from '@/contextos/clinica-contexto';
+import { VisualizadorArchivos } from '@/componentes/archivos/visualizador-archivos';
+import { usarConexion } from '@/hooks/usar-conexion';
+
+interface ReporteGuardado {
+  id: number;
+  nombre: string;
+  areas: AreaReporte[];
+  fecha_inicio?: Date;
+  fecha_fin?: Date;
+  fecha_creacion: Date;
+  analisis_gemini?: string;
+}
+
+export function GestionReportes() {
+  const { config_clinica } = useClinica();
+  const { en_linea } = usarConexion();
+  const [abierto, setAbierto] = useState(false);
+  const [areas_seleccionadas, setAreasSeleccionadas] = useState<AreaReporte[]>([]);
+  const [fecha_inicio, setFechaInicio] = useState<Date>(new Date(new Date().getFullYear(), 0, 1));
+  const [fecha_fin, setFechaFin] = useState<Date>(new Date(new Date().getFullYear(), 11, 31));
+  const [incluir_sugerencias, setIncluirSugerencias] = useState(true);
+  const [cargando, setCargando] = useState(false);
+  const [reportes_guardados, setReportesGuardados] = useState<ReporteGuardado[]>([]);
+  const [filtro_nombre, setFiltroNombre] = useState('');
+  const [filtro_areas, setFiltroAreas] = useState<string[]>([]);
+
+  const [reporte_visualizando, setReporteVisualizando] = useState<{
+    id: number;
+    nombre_archivo: string;
+    tipo_mime: string;
+    descripcion?: string;
+    url?: string;
+    fecha_subida: string;
+  } | null>(null);
+  const [visualizador_abierto, setVisualizadorAbierto] = useState(false);
+  const [reporte_cargando_id, setReporteCargandoId] = useState<number | null>(null);
+  const [dialogo_confirmar_eliminar, setDialogoConfirmarEliminar] = useState(false);
+  const [reporte_a_eliminar, setReporteAEliminar] = useState<number | null>(null);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    cargarReportes();
+  }, []);
+
+  const cargarReportes = async () => {
+    try {
+      const reportes = await reportesApi.obtener();
+      setReportesGuardados(reportes);
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(
+          new CustomEvent('tutorial:reportes-actualizados', {
+            detail: { total: Array.isArray(reportes) ? reportes.length : 0 },
+          })
+        );
+      }
+    } catch (error) {
+      console.error('Error al cargar reportes:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudieron cargar los reportes',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const areas_disponibles = [
+    { valor: AreaReporte.FINANZAS, etiqueta: 'Finanzas', descripcion: 'Ingresos, egresos y balance' },
+    { valor: AreaReporte.AGENDA, etiqueta: 'Agenda', descripcion: 'Citas y programación' },
+    { valor: AreaReporte.TRATAMIENTOS, etiqueta: 'Tratamientos', descripcion: 'Planes de tratamiento' },
+    { valor: AreaReporte.INVENTARIO, etiqueta: 'Inventario', descripcion: 'Stock y productos' },
+  ];
+
+  const toggleArea = (area: AreaReporte) => {
+    setAreasSeleccionadas(prev =>
+      prev.includes(area)
+        ? prev.filter(a => a !== area)
+        : [...prev, area]
+    );
+  };
+
+  const gemini_verificado = config_clinica?.gemini_verificado === true;
+  const puede_generar_reporte = en_linea && gemini_verificado;
+  const titulo_bloqueo_boton = !en_linea
+    ? 'Sin conexión a internet'
+    : (!gemini_verificado ? 'Configura y valida la API de Gemini en Configuración > Ajustes' : '');
+
+  const generarReporte = async () => {
+    if (!puede_generar_reporte) {
+      toast({
+        title: 'Acción no disponible',
+        description: titulo_bloqueo_boton || 'No es posible generar reportes en este momento',
+        variant: 'destructive',
+      });
+      return;
+    }
+    if (areas_seleccionadas.length === 0) {
+      toast({
+        title: 'Error',
+        description: 'Debes seleccionar al menos un área',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!fecha_inicio || !fecha_fin) {
+      toast({
+        title: 'Error',
+        description: 'Debes seleccionar las fechas de inicio y fin',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setCargando(true);
+    try {
+      const datos = {
+        areas: areas_seleccionadas,
+        fecha_inicio: format(fecha_inicio, 'yyyy-MM-dd'),
+        fecha_fin: format(fecha_fin, 'yyyy-MM-dd'),
+        incluir_sugerencias,
+      };
+
+      await reportesApi.generar(datos);
+
+      toast({
+        title: 'Reporte generado',
+        description: 'El reporte se ha generado y guardado correctamente',
+      });
+
+      setAbierto(false);
+      setAreasSeleccionadas([]);
+      setFechaInicio(new Date(new Date().getFullYear(), 0, 1));
+      setFechaFin(new Date(new Date().getFullYear(), 11, 31));
+      setIncluirSugerencias(true);
+      await cargarReportes();
+    } catch (error) {
+      console.error('Error al generar reporte:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo generar el reporte',
+        variant: 'destructive',
+      });
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  const descargarReporte = async (reporte: ReporteGuardado) => {
+    try {
+      const blob = await reportesApi.descargar(reporte.id);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${reporte.nombre}-${format(new Date(reporte.fecha_creacion), 'yyyy-MM-dd')}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'No se pudo descargar el reporte',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const abrirDialogoConfirmarEliminar = (id: number) => {
+    setReporteAEliminar(id);
+    setDialogoConfirmarEliminar(true);
+  };
+
+  const eliminarReporte = async () => {
+    if (!reporte_a_eliminar) return;
+    try {
+      await reportesApi.eliminar(reporte_a_eliminar);
+      toast({
+        title: 'Éxito',
+        description: 'Reporte eliminado correctamente',
+      });
+      setDialogoConfirmarEliminar(false);
+      setReporteAEliminar(null);
+      await cargarReportes();
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'No se pudo eliminar el reporte',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const verReporte = async (reporte: ReporteGuardado) => {
+    setReporteCargandoId(reporte.id);
+    try {
+      const blob = await reportesApi.descargar(reporte.id);
+      const url = URL.createObjectURL(blob);
+
+      setReporteVisualizando({
+        id: reporte.id,
+        nombre_archivo: `${reporte.nombre}-${format(new Date(reporte.fecha_creacion), 'yyyy-MM-dd')}.pdf`,
+        tipo_mime: 'application/pdf',
+        descripcion: `Áreas: ${reporte.areas.join(', ')}`,
+        url: url,
+        fecha_subida: new Date(reporte.fecha_creacion).toISOString(),
+      });
+      setVisualizadorAbierto(true);
+    } catch (error) {
+      console.error('Error al visualizar reporte:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo cargar el reporte seleccionado',
+        variant: 'destructive',
+      });
+    } finally {
+      setReporteCargandoId(null);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Reportes</h2>
+          <p className="text-muted-foreground">
+            Genera reportes con análisis de IA usando Gemini
+          </p>
+        </div>
+        <Dialog
+          open={abierto}
+          onOpenChange={(v) => {
+            if (cargando) return;
+            if (v && !puede_generar_reporte) return;
+            setAbierto(v);
+          }}
+        >
+          <DialogTrigger asChild>
+            <span
+              title={titulo_bloqueo_boton}
+              onClickCapture={(e) => {
+                if (!puede_generar_reporte) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }
+              }}
+            >
+              <Button id="btn-generar-reporte" size="lg" className="gap-2" disabled={!puede_generar_reporte}>
+                <FileText className="h-5 w-5" />
+                Generar Reporte
+              </Button>
+            </span>
+          </DialogTrigger>
+          <DialogContent id="dialog-generar-reporte" className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Generar Nuevo Reporte</DialogTitle>
+              <DialogDescription>
+                Selecciona las áreas y el período para generar tu reporte
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-6 py-4">
+              <div className="space-y-4">
+                <Label id="reporte-areas-label">Áreas a incluir</Label>
+                <div id="reporte-areas-container" className="grid grid-cols-2 gap-3">
+                  {areas_disponibles.map((area) => (
+                    <Card
+                      key={area.valor}
+                      id={`reporte-area-${String(area.valor).toLowerCase()}`}
+                      className={cn(
+                        'cursor-pointer transition-all hover:shadow-md',
+                        areas_seleccionadas.includes(area.valor)
+                          ? 'border-primary bg-primary/5'
+                          : 'border-border'
+                      )}
+                      onClick={() => toggleArea(area.valor)}
+                    >
+                      <CardHeader className="p-4">
+                        <CardTitle className="text-base">{area.etiqueta}</CardTitle>
+                        <CardDescription className="text-xs">
+                          {area.descripcion}
+                        </CardDescription>
+                      </CardHeader>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="space-y-0.5 mb-2">
+                  <Label id="reporte-intervalo-fechas">Intervalo de fechas</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Selecciona el período que abarcará el reporte
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Fecha de inicio *</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          id="reporte-fecha-inicio-trigger"
+                          variant="outline"
+                          className={cn(
+                            'w-full justify-start text-left font-normal',
+                            !fecha_inicio && 'text-muted-foreground'
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {fecha_inicio ? format(fecha_inicio, 'PPP', { locale: es }) : 'Seleccionar'}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={fecha_inicio}
+                          onSelect={setFechaInicio}
+                          locale={es}
+                          initialFocus
+                          required
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Fecha de fin *</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          id="reporte-fecha-fin-trigger"
+                          variant="outline"
+                          className={cn(
+                            'w-full justify-start text-left font-normal',
+                            !fecha_fin && 'text-muted-foreground'
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {fecha_fin ? format(fecha_fin, 'PPP', { locale: es }) : 'Seleccionar'}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={fecha_fin}
+                          onSelect={setFechaFin}
+                          locale={es}
+                          disabled={(date) => fecha_inicio ? date < fecha_inicio : false}
+                          initialFocus
+                          required
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center justify-between space-x-2">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="incluir-sugerencias">Incluir sugerencias y conclusiones</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Activado: GEMINI añadirá recomendaciones y conclusiones al análisis
+                    </p>
+                  </div>
+                  <Switch
+                    id="incluir-sugerencias"
+                    checked={incluir_sugerencias}
+                    onCheckedChange={setIncluirSugerencias}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button id="reporte-btn-cancelar" variant="outline" onClick={() => setAbierto(false)} disabled={cargando}>
+                Cancelar
+              </Button>
+              <Button id="reporte-btn-generar" onClick={generarReporte} disabled={cargando}>
+                {cargando && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Generar
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+      <div className="grid gap-3 md:grid-cols-2">
+        <div className="space-y-1">
+          <Label className="text-sm">Buscar por nombre</Label>
+          <Input
+            id="reporte-filtro-nombre"
+            placeholder="Escribe el nombre del reporte..."
+            value={filtro_nombre}
+            onChange={(e) => setFiltroNombre(e.target.value)}
+          />
+        </div>
+        <div id="reporte-filtro-areas" className="space-y-1">
+          <Label className="text-sm">Áreas</Label>
+          <MultiSelect
+            opciones={areas_disponibles.map(a => ({ valor: String(a.valor), etiqueta: a.etiqueta }))}
+            valores={filtro_areas}
+            onChange={setFiltroAreas}
+            placeholder="Filtrar por áreas"
+            textoVacio="Sin áreas"
+          />
+        </div>
+      </div>
+
+      {reportes_guardados.length === 0 ? (
+        <Card className="border-dashed">
+          <CardContent className="flex flex-col items-center justify-center py-16">
+            <FileText className="h-16 w-16 text-muted-foreground mb-4" />
+            <h3 className="text-xl font-semibold mb-2">No hay reportes generados</h3>
+            <p className="text-muted-foreground text-center mb-4">
+              Genera tu primer reporte para ver análisis con IA
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {reportes_guardados
+            .filter((reporte) => {
+              const termino = filtro_nombre.trim().toLowerCase();
+              const coincideNombre = termino ? reporte.nombre.toLowerCase().includes(termino) : true;
+              const coincideAreas = filtro_areas.length === 0 ||
+                filtro_areas.every((a) => reporte.areas.map(String).includes(a));
+              return coincideNombre && coincideAreas;
+            })
+            .map((reporte, index) => (
+              <Card
+                key={reporte.id}
+                id={index === 0 ? 'reporte-item-primero' : undefined}
+                className="overflow-hidden"
+              >
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1">
+                      <CardTitle className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        {reporte.nombre}
+                      </CardTitle>
+                      <CardDescription>
+                        <div>Generado: {format(new Date(reporte.fecha_creacion), 'dd/MM/yyyy HH:mm', { locale: es })}</div>
+                        <div>Áreas: {reporte.areas.join(', ')}</div>
+                        {reporte.fecha_inicio && reporte.fecha_fin && (
+                          <div>Período: {(() => {
+                            const parseFechaLocal = (fechaStr: string | Date) => {
+                              const fecha = new Date(fechaStr);
+                              return new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
+                            };
+                            const inicio = parseFechaLocal(reporte.fecha_inicio);
+                            const fin = parseFechaLocal(reporte.fecha_fin);
+                            return `${format(inicio, 'dd/MM/yyyy', { locale: es })} - ${format(fin, 'dd/MM/yyyy', { locale: es })}`;
+                          })()}</div>
+                        )}
+                      </CardDescription>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        id={index === 0 ? 'btn-ver-reporte-primero' : undefined}
+                        variant="outline"
+                        size="icon"
+                        onClick={() => verReporte(reporte)}
+                        disabled={reporte_cargando_id === reporte.id}
+                        title="Visualizar PDF"
+                      >
+                        {reporte_cargando_id === reporte.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                      <Button
+                        id={index === 0 ? 'btn-descargar-reporte-primero' : undefined}
+                        variant="outline"
+                        size="icon"
+                        onClick={() => descargarReporte(reporte)}
+                        title="Descargar PDF"
+                      >
+                        <Download className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        id={index === 0 ? 'btn-eliminar-reporte-primero' : undefined}
+                        variant="outline"
+                        size="icon"
+                        onClick={() => abrirDialogoConfirmarEliminar(reporte.id)}
+                        title="Eliminar reporte"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+              </Card>
+            ))}
+        </div>
+      )}
+
+      {reporte_visualizando && visualizador_abierto && (
+        <VisualizadorArchivos
+          archivo={reporte_visualizando}
+          abierto={visualizador_abierto}
+          onCerrar={() => {
+            setVisualizadorAbierto(false);
+            setReporteVisualizando(null);
+          }}
+        />
+      )}
+
+      <Dialog open={dialogo_confirmar_eliminar} onOpenChange={setDialogoConfirmarEliminar}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Confirmar Eliminación</DialogTitle>
+            <DialogDescription>
+              ¿Estás seguro de que deseas eliminar este reporte?
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+            <p className="text-sm text-destructive">
+              Esta acción no se puede deshacer.
+            </p>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setDialogoConfirmarEliminar(false);
+                setReporteAEliminar(null);
+              }}
+              className="hover:scale-105 transition-all duration-200"
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={eliminarReporte}
+              className="hover:shadow-[0_0_15px_rgba(239,68,68,0.4)] hover:scale-105 transition-all duration-200"
+            >
+              Eliminar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
